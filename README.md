@@ -28,7 +28,7 @@ rl.Uri("http://www.詹姆斯.org/path/../path/to/somewhere/?id=45&dskafd=safla&s
 
 ### Expanding a url
 
-```
+```scala
 val expandUrl = rl.expand.UrlExpander()
 expandUrl(rl.Uri("http://goo.gl/VM830")) onSuccess {
   case uri: Uri => println("The final uri: "+uri.asciiString)
