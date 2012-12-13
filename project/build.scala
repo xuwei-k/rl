@@ -189,7 +189,7 @@ object RlBuild extends Build {
     description := "An RFC-3986 compliant URI library."))
 
   lazy val followRedirects = Project("rl-expand", file("expand"), settings = projectSettings ++ Seq(
-    name := "rl-expand",
+    name := "rl-expander",
     description := "Expands urls when they appear shortened",
     libraryDependencies += "com.ning" % "async-http-client" % "1.7.8",
     libraryDependencies += "com.typesafe.akka" % "akka-actor" % "2.0.4"
