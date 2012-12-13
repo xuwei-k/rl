@@ -1,6 +1,7 @@
 import sbt._
 import Keys._
 import scala.xml._
+import sbtbuildinfo.Plugin._
 //import com.typesafe.sbtscalariform._
 //import ScalariformPlugin._
 //import ScalariformKeys._
@@ -30,9 +31,9 @@ object ShellPrompt {
 }
 
 object RlSettings {
-  val buildOrganization = "io.backchat.rl"
+  val buildOrganization = "org.scalatra.rl"
   val buildScalaVersion = "2.9.2"
-  val buildVersion      = "0.3.3"
+  val buildVersion      = "0.4.0"
 //
 //  lazy val formatSettings = ScalariformPlugin.scalariformSettings ++ Seq(
 //     preferences in Compile := formattingPreferences,
@@ -57,13 +58,10 @@ object RlSettings {
   )
 
   val buildSettings = Defaults.defaultSettings ++ Seq(
-      name := "rl",
       version := buildVersion,
       organization := buildOrganization,
       scalaVersion := buildScalaVersion,
       javacOptions ++= Seq("-Xlint:unchecked"),
-      exportJars := true,
-      testOptions in Test += Tests.Setup( () => System.setProperty("akka.mode", "test") ),
       scalacOptions ++= Seq(
         "-optimize",
         "-deprecation",
@@ -71,7 +69,7 @@ object RlSettings {
         "-Xcheckinit",
         "-encoding", "utf8"),
       libraryDependencies <+= (scalaVersion) {
-        case "2.10.0-RC3" => "org.specs2" % "specs2_2.10.0-RC3" % "1.12.3" % "test"
+        case "2.10.0-RC5" => "org.specs2" % "specs2_2.10.0-RC5" % "1.12.3" % "test"
         case "2.9.0-1" => "org.specs2" %% "specs2" % "1.5" % "test"
         case "2.9.0" => "org.specs2" % "specs2_2.9.0-1" % "1.5" % "test"
         case _ => "org.specs2" %% "specs2" % "1.12" % "test"
@@ -83,7 +81,7 @@ object RlSettings {
         "Sonatype Snapshots" at "https://oss.sonatype.org/content/repositories/snapshots",
         "Typesafe Releases" at "http://repo.typesafe.com/typesafe/releases/"
       ),
-      crossScalaVersions := Seq("2.9.1", "2.9.0-1", "2.9.0", "2.9.1-1", "2.9.2", "2.10.0-RC3"),
+      crossScalaVersions := Seq("2.9.1", "2.9.0-1", "2.9.0", "2.9.1-1", "2.9.2", "2.10.0-RC5"),
 //      (excludeFilter in format) <<= (excludeFilter) (_ || "*Spec.scala"),
       libraryDependencies ++= compilerPlugins,
       artifact in (Compile, packageBin) ~= { (art: Artifact) =>
@@ -161,16 +159,41 @@ object RlBuild extends Build {
     val domainFileUrl = SettingKey[URL]("tld-file-url", "the url from where to download the file that contains the tld names")
   }
 
-  lazy val root = Project ("rl", file("."), settings = projectSettings ++ Seq(
+  val unpublished = Seq(
+    // no artifacts in this project
+    publishArtifact := false,
+    // make-pom has a more specific publishArtifact setting already
+    // so needs specific override
+    publishArtifact in makePom := false,
+    // can't seem to get rid of ivy files except by no-op'ing the entire publish task
+    publish := {},
+    publishLocal := {}
+  )
+
+  lazy val root = Project ("rl-project", file("."),
+                          settings = Project.defaultSettings ++ unpublished ++ Seq(name := "rl-project")) aggregate(core, followRedirects)
+
+  lazy val core = Project ("rl", file("core"), settings = projectSettings ++ buildInfoSettings ++ Seq(
+    name := "rl",
     rl.domainFile <<= (resourceDirectory in Compile) apply { dir =>
       val rlResource = dir / "rl"
       rlResource.mkdirs()
       rlResource / "tld_names.dat"
     },
+    sourceGenerators in Compile <+= buildInfo,
+    buildInfoKeys := Seq[BuildInfoKey](name, version, scalaVersion, sbtVersion),
+    buildInfoPackage := "rl",
     rl.domainFileUrl := url("http://mxr.mozilla.org/mozilla-central/source/netwerk/dns/effective_tld_names.dat?raw=1"),
     rl.downloadDomainFile <<= (rl.domainFile, rl.domainFileUrl, streams) map (_ #< _ ! _.log),
     (compile in Compile) <<= (compile in Compile) dependsOn rl.downloadDomainFile,
     description := "An RFC-3986 compliant URI library."))
+
+  lazy val followRedirects = Project("rl-expand", file("expand"), settings = projectSettings ++ Seq(
+    name := "rl-expand",
+    description := "Expands urls when they appear shortened",
+    libraryDependencies += "com.ning" % "async-http-client" % "1.7.8",
+    libraryDependencies += "com.typesafe.akka" % "akka-actor" % "2.0.4"
+  )) dependsOn (core)
 
 }
 
