@@ -10,8 +10,13 @@ import akka.util.Duration
 import akka.util.duration._
 import scala.util.control.Exception._
 import filter.{ResponseFilter, FilterContext}
-import expand.UrlExpander.ExpanderConfig
 import com.ning.http.client.AsyncHandler.STATE
+
+case class ExpanderConfig(
+             maxConnectionsTotal: Int = 50,
+             maxConnectionsPerHost: Int = 5,
+             threadPoolSize: Int = 50,
+             requestTimeout: Duration = 90.seconds)
 
 object UrlExpander {
 
@@ -47,32 +52,27 @@ object UrlExpander {
     }
   }
 
-  class RedirectFilter extends ResponseFilter {
+  private class RedirectFilter extends ResponseFilter {
     def filter(ctx: FilterContext[_]): FilterContext[_] = {
       ctx.getAsyncHandler match {
         case h: PromiseHandler if RedirectCodes contains ctx.getResponseStatus.getStatusCode =>
           h.onRedirect(h.current)
           h.current = rl.Uri(ctx.getResponseHeaders.getHeaders.getFirstValue("Location"))
-          val b = new FilterContext.FilterContextBuilder[Uri]()
-          b.asyncHandler(h)
-          b.request(new RequestBuilder("GET", true).setUrl(h.current.asciiString).build())
-          b.build()
+          (new FilterContext.FilterContextBuilder[Uri]()
+            asyncHandler h
+            request new RequestBuilder("GET", true).setUrl(h.current.asciiString).build()
+            replayRequest true).build()
         case _ => ctx
       }
     }
   }
 
 
-  case class ExpanderConfig(
-               maxConnectionsTotal: Int = 50,
-               maxConnectionsPerHost: Int = 5,
-               threadPoolSize: Int = 50,
-               requestTimeout: Duration = 90.seconds)
 
   def apply(config: ExpanderConfig = ExpanderConfig()) = new UrlExpander(config)
 }
 
-final class UrlExpander(config: ExpanderConfig = UrlExpander.ExpanderConfig()) {
+final class UrlExpander(config: ExpanderConfig = ExpanderConfig()) {
 
   import UrlExpander._
   protected implicit val execContext = ExecutionContext.fromExecutorService(ActiveRequestThreads(config.threadPoolSize))
@@ -95,7 +95,7 @@ final class UrlExpander(config: ExpanderConfig = UrlExpander.ExpanderConfig()) {
   private[this] val http = new AsyncHttpClient(httpConfig)
   sys.addShutdownHook(stop())
 
-  def apply(uri: rl.Uri, onRedirect: Uri => Unit): Future[rl.Uri] = {
+  def apply(uri: rl.Uri, onRedirect: Uri => Unit = _ => ()): Future[rl.Uri] = {
     val prom = akka.dispatch.Promise[rl.Uri]
     val req = http.prepareHead(uri.asciiString)
     req.execute(new PromiseHandler(uri, prom, onRedirect))
