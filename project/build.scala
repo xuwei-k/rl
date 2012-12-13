@@ -171,7 +171,10 @@ object RlBuild extends Build {
   )
 
   lazy val root = Project ("rl-project", file("."),
-                          settings = Project.defaultSettings ++ unpublished ++ Seq(name := "rl-project")) aggregate(core, followRedirects)
+                          settings = Project.defaultSettings ++ unpublished ++ Seq(
+                            name := "rl-project",
+                            crossScalaVersions := Seq("2.9.1", "2.9.0-1", "2.9.0", "2.9.1-1", "2.9.2", "2.10.0-RC5")
+                          )) aggregate(core, followRedirects)
 
   lazy val core = Project ("rl", file("core"), settings = projectSettings ++ buildInfoSettings ++ Seq(
     name := "rl",

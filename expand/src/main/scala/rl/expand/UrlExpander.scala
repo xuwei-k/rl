@@ -39,17 +39,10 @@ object UrlExpander {
 
   private class PromiseHandler(var current: Uri, val promise: Promise[Uri], val onRedirect: Uri => Unit) extends AsyncHandler[Uri] {
     def onThrowable(t: Throwable) { promise failure t }
-
     def onBodyPartReceived(bodyPart: HttpResponseBodyPart): STATE = STATE.CONTINUE
-
     def onStatusReceived(responseStatus: HttpResponseStatus): STATE = STATE.CONTINUE
-
     def onHeadersReceived(headers: HttpResponseHeaders): STATE = STATE.CONTINUE
-
-    def onCompleted(): Uri = {
-      promise success current
-      current
-    }
+    def onCompleted(): Uri = { promise success current; current }
   }
 
   private class RedirectFilter extends ResponseFilter {
@@ -57,7 +50,7 @@ object UrlExpander {
       ctx.getAsyncHandler match {
         case h: PromiseHandler if RedirectCodes contains ctx.getResponseStatus.getStatusCode =>
           h.onRedirect(h.current)
-          h.current = rl.Uri(ctx.getResponseHeaders.getHeaders.getFirstValue("Location"))
+          h.current = rl.Uri(ctx.getResponseHeaders.getHeaders.getFirstValue("Location")).normalize
           (new FilterContext.FilterContextBuilder[Uri]()
             asyncHandler h
             request new RequestBuilder("GET", true).setUrl(h.current.asciiString).build()
@@ -97,8 +90,9 @@ final class UrlExpander(config: ExpanderConfig = ExpanderConfig()) {
 
   def apply(uri: rl.Uri, onRedirect: Uri => Unit = _ => ()): Future[rl.Uri] = {
     val prom = akka.dispatch.Promise[rl.Uri]
-    val req = http.prepareHead(uri.asciiString)
-    req.execute(new PromiseHandler(uri, prom, onRedirect))
+    val u = uri.normalize
+    val req = http.prepareHead(u.asciiString)
+    req.execute(new PromiseHandler(u, prom, onRedirect))
     prom.future
   }
 
