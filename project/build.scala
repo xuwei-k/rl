@@ -32,7 +32,7 @@ object ShellPrompt {
 
 object RlSettings {
   val buildOrganization = "org.scalatra.rl"
-  val buildScalaVersion = "2.9.2"
+  val buildScalaVersion = "2.10.0"
   val buildVersion      = "0.4.0"
 //
 //  lazy val formatSettings = ScalariformPlugin.scalariformSettings ++ Seq(
@@ -69,19 +69,19 @@ object RlSettings {
         "-Xcheckinit",
         "-encoding", "utf8"),
       libraryDependencies <+= (scalaVersion) {
-        case "2.10.0-RC5" => "org.specs2" % "specs2_2.10.0-RC5" % "1.12.3" % "test"
         case "2.9.0-1" => "org.specs2" %% "specs2" % "1.5" % "test"
         case "2.9.0" => "org.specs2" % "specs2_2.9.0-1" % "1.5" % "test"
-        case _ => "org.specs2" %% "specs2" % "1.12" % "test"
+        case v if v.startsWith("2.9") => "org.specs2" %% "specs2" % "1.12" % "test"
+        case _ => "org.specs2" %% "specs2" % "1.13" % "test"
       },
       libraryDependencies += "junit" % "junit" % "4.10" % "test",
-      crossVersion := CrossVersion.full,
+      crossVersion := CrossVersion.binary,
       resolvers ++= Seq(
         "Sonatype Releases" at "https://oss.sonatype.org/content/repositories/releases",
         "Sonatype Snapshots" at "https://oss.sonatype.org/content/repositories/snapshots",
         "Typesafe Releases" at "http://repo.typesafe.com/typesafe/releases/"
       ),
-      crossScalaVersions := Seq("2.9.1", "2.9.0-1", "2.9.0", "2.9.1-1", "2.9.2", "2.10.0-RC5"),
+      crossScalaVersions := Seq("2.9.1", "2.9.0-1", "2.9.0", "2.9.1-1", "2.9.2", "2.10.0"),
 //      (excludeFilter in format) <<= (excludeFilter) (_ || "*Spec.scala"),
       libraryDependencies ++= compilerPlugins,
       artifact in (Compile, packageBin) ~= { (art: Artifact) =>
