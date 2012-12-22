@@ -5,12 +5,11 @@ import com.ning.http.client._
 import java.util.{ concurrent => juc }
 import java.util.concurrent.atomic.AtomicLong
 import com.ning.http.client.providers.netty.NettyAsyncHttpProviderConfig
-import akka.dispatch.{Promise, ExecutionContext, Future}
-import akka.util.Duration
-import akka.util.duration._
 import scala.util.control.Exception._
 import filter.{ResponseFilter, FilterContext}
 import com.ning.http.client.AsyncHandler.STATE
+import scala.concurrent.duration._
+import scala.concurrent.{Future, ExecutionContext, Promise}
 
 case class ExpanderConfig(
              maxConnectionsTotal: Int = 50,
@@ -89,7 +88,7 @@ final class UrlExpander(config: ExpanderConfig = ExpanderConfig()) {
   sys.addShutdownHook(stop())
 
   def apply(uri: rl.Uri, onRedirect: Uri => Unit = _ => ()): Future[rl.Uri] = {
-    val prom = akka.dispatch.Promise[rl.Uri]
+    val prom = scala.concurrent.Promise[rl.Uri]()
     val u = uri.normalize
     val req = http.prepareHead(u.asciiString)
     req.execute(new PromiseHandler(u, prom, onRedirect))

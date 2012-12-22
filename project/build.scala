@@ -173,7 +173,8 @@ object RlBuild extends Build {
   lazy val root = Project ("rl-project", file("."),
                           settings = Project.defaultSettings ++ unpublished ++ Seq(
                             name := "rl-project",
-                            crossScalaVersions := Seq("2.9.1", "2.9.0-1", "2.9.0", "2.9.1-1", "2.9.2", "2.10.0-RC5")
+                            scalaVersion := buildScalaVersion,
+                            crossScalaVersions := Seq("2.9.1", "2.9.0-1", "2.9.0", "2.9.1-1", "2.9.2", "2.10.0")
                           )) aggregate(core, followRedirects)
 
   lazy val core = Project ("rl", file("core"), settings = projectSettings ++ buildInfoSettings ++ Seq(
@@ -194,8 +195,12 @@ object RlBuild extends Build {
   lazy val followRedirects = Project("rl-expand", file("expand"), settings = projectSettings ++ Seq(
     name := "rl-expander",
     description := "Expands urls when they appear shortened",
+    resolvers += "Typesafe Repository" at "http://repo.typesafe.com/typesafe/releases/",
     libraryDependencies += "com.ning" % "async-http-client" % "1.7.8",
-    libraryDependencies += "com.typesafe.akka" % "akka-actor" % "2.0.4"
+    libraryDependencies <++= (scalaVersion) { 
+      case v if v.startsWith("2.9") => Seq("com.typesafe.akka" % "akka-actor" % "2.0.4")
+      case _ => Seq.empty
+    } 
   )) dependsOn (core)
 
 }

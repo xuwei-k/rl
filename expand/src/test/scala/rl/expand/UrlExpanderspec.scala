@@ -5,9 +5,9 @@ import org.jboss.netty.channel.{ChannelFutureListener, ChannelHandlerContext}
 import org.jboss.netty.handler.codec.http._
 import org.jboss.netty.handler.codec.http.HttpHeaders.Names
 import org.jboss.netty.buffer.ChannelBuffers
-import akka.dispatch.Await
-import akka.util.duration._
 import org.specs2.time.NoTimeConversions
+import scala.concurrent.duration._
+import scala.concurrent.Await
 
 class UrlExpanderspec extends org.specs2.mutable.Specification with NoTimeConversions {
 //  def nettyContext: NettyHttpServerContext = new NettyHttpServerContext {
