@@ -7,14 +7,16 @@ import org.jboss.netty.handler.codec.http.HttpHeaders.Names
 import org.jboss.netty.buffer.ChannelBuffers
 import akka.dispatch.Await
 import akka.util.duration._
-import org.specs2.time.NoTimeConversions
 
-class UrlExpanderspec extends org.specs2.mutable.Specification with NoTimeConversions {
+class UrlExpanderspec extends org.specs2.mutable.Specification  {
 //  def nettyContext: NettyHttpServerContext = new NettyHttpServerContext {
 //    def handleRequest(ctx: ChannelHandlerContext, req: HttpRequest) {
 //
 //    }
 //  }
+
+  override def intToRichLong(v: Int)   = super.intToRichLong(v)
+  override def longToRichLong(v: Long) = super.longToRichLong(v)
 
   sequential
 
