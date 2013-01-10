@@ -81,7 +81,7 @@ object RlSettings {
         "Sonatype Snapshots" at "https://oss.sonatype.org/content/repositories/snapshots",
         "Typesafe Releases" at "http://repo.typesafe.com/typesafe/releases/"
       ),
-      crossScalaVersions := Seq("2.9.1", "2.9.0-1", "2.9.0", "2.9.1-1", "2.9.2", "2.10.0"),
+      crossScalaVersions := Seq("2.10.0"),
 //      (excludeFilter in format) <<= (excludeFilter) (_ || "*Spec.scala"),
       libraryDependencies ++= compilerPlugins,
       artifact in (Compile, packageBin) ~= { (art: Artifact) =>
@@ -174,7 +174,7 @@ object RlBuild extends Build {
                           settings = Project.defaultSettings ++ unpublished ++ Seq(
                             name := "rl-project",
                             scalaVersion := buildScalaVersion,
-                            crossScalaVersions := Seq("2.9.1", "2.9.0-1", "2.9.0", "2.9.1-1", "2.9.2", "2.10.0")
+                            crossScalaVersions := Seq("2.10.0")
                           )) aggregate(core, followRedirects)
 
   lazy val core = Project ("rl", file("core"), settings = projectSettings ++ buildInfoSettings ++ Seq(
@@ -198,7 +198,7 @@ object RlBuild extends Build {
     resolvers += "Typesafe Repository" at "http://repo.typesafe.com/typesafe/releases/",
     libraryDependencies += "com.ning" % "async-http-client" % "1.7.8",
     libraryDependencies <++= (scalaVersion) { 
-      case v if v.startsWith("2.9") => Seq("com.typesafe.akka" % "akka-actor" % "2.0.4")
+      case v if v.startsWith("2.9") => Seq("com.typesafe.akka" % "akka-actor" % "2.0.5")
       case _ => Seq.empty
     } 
   )) dependsOn (core)
