@@ -32,7 +32,7 @@ object ShellPrompt {
 
 object RlSettings {
   val buildOrganization = "org.scalatra.rl"
-  val buildScalaVersion = "2.10.0"
+  val buildScalaVersion = "2.9.2"
   val buildVersion      = "0.4.1"
 //
 //  lazy val formatSettings = ScalariformPlugin.scalariformSettings ++ Seq(
