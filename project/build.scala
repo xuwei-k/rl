@@ -33,7 +33,7 @@ object ShellPrompt {
 object RlSettings {
   val buildOrganization = "org.scalatra.rl"
   val buildScalaVersion = "2.10.0"
-  val buildVersion      = "0.4.0"
+  val buildVersion      = "0.4.1"
 //
 //  lazy val formatSettings = ScalariformPlugin.scalariformSettings ++ Seq(
 //     preferences in Compile := formattingPreferences,
@@ -81,7 +81,7 @@ object RlSettings {
         "Sonatype Snapshots" at "https://oss.sonatype.org/content/repositories/snapshots",
         "Typesafe Releases" at "http://repo.typesafe.com/typesafe/releases/"
       ),
-      crossScalaVersions := Seq("2.9.1", "2.9.0-1", "2.9.0", "2.9.1-1", "2.9.2", "2.10.0"),
+      crossScalaVersions := Seq("2.9.1", "2.9.0-1", "2.9.0", "2.9.1-1", "2.9.2"),
 //      (excludeFilter in format) <<= (excludeFilter) (_ || "*Spec.scala"),
       libraryDependencies ++= compilerPlugins,
       artifact in (Compile, packageBin) ~= { (art: Artifact) =>
@@ -173,7 +173,7 @@ object RlBuild extends Build {
   lazy val root = Project ("rl-project", file("."),
                           settings = Project.defaultSettings ++ unpublished ++ Seq(
                             name := "rl-project",
-                            crossScalaVersions := Seq("2.9.1", "2.9.0-1", "2.9.0", "2.9.1-1", "2.9.2", "2.10.0-RC5")
+                            crossScalaVersions := Seq("2.9.1", "2.9.0-1", "2.9.0", "2.9.1-1", "2.9.2")
                           )) aggregate(core, followRedirects)
 
   lazy val core = Project ("rl", file("core"), settings = projectSettings ++ buildInfoSettings ++ Seq(
@@ -195,7 +195,7 @@ object RlBuild extends Build {
     name := "rl-expander",
     description := "Expands urls when they appear shortened",
     libraryDependencies += "com.ning" % "async-http-client" % "1.7.8",
-    libraryDependencies += "com.typesafe.akka" % "akka-actor" % "2.0.4"
+    libraryDependencies += "com.typesafe.akka" % "akka-actor" % "2.0.5"
   )) dependsOn (core)
 
 }
