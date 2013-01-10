@@ -71,7 +71,7 @@ object RlSettings {
       libraryDependencies <+= (scalaVersion) {
         // case "2.9.0-1" |  => "org.specs2" % "specs2_2.9.2" % "1.12" % "test"
         // case "2.9.0" => "org.specs2" % "specs2_2.9.0-1" % "1.5" % "test"
-        case v if v.startsWith("2.9") => "org.specs2" %% "specs2" % "1.12" % "test"
+        case v if v.startsWith("2.9") => "org.specs2" % "specs2_2.9.2" % "1.12" % "test"
         case _ => "org.specs2" %% "specs2" % "1.13" % "test"
       },
       libraryDependencies += "junit" % "junit" % "4.10" % "test",
