@@ -50,7 +50,7 @@ case class StringQueryString(rawValue: String) extends QueryString {
   def normalize = this
 }
 case class StringSeqQueryString(rawValue: String) extends QueryString {
-  val value: Value = rawValue.blankOption(_.split("&").map(_.urlDecode).toList).getOrElse(Nil)
+  val value: Value = rawValue.blankOption.map(_.split("&").map(_.urlDecode).toList).getOrElse(Nil)
 
   val uriPart = "?" + value.map(_.urlEncode).mkString("?", "&", "")
 
