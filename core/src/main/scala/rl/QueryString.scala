@@ -40,8 +40,8 @@ case object EmptyQueryString extends QueryString {
 }
 case class StringQueryString(rawValue: String) extends QueryString {
 
-  val uriPart = "?" + rawValue.urlEncode
-  val value = rawValue.urlDecode
+  val uriPart = "?" + rawValue.blankOption.map(_.urlEncode).getOrElse("")
+  val value = rawValue.blankOption.map(_.urlEncode).getOrElse("")
 
   val empty = ""
 
@@ -50,12 +50,13 @@ case class StringQueryString(rawValue: String) extends QueryString {
   def normalize = this
 }
 case class StringSeqQueryString(rawValue: String) extends QueryString {
+  val value: Value = rawValue.blankOption(_.split("&").map(_.urlDecode).toList).getOrElse(Nil)
+
   val uriPart = "?" + value.map(_.urlEncode).mkString("?", "&", "")
 
   val empty = Nil
 
-  val value: Value = rawValue.split("&").map(_.urlDecode).toList
-
+  
   type Value = List[String]
 
   def normalize = StringSeqQueryString(value.sortWith(_ >= _).map(_.urlEncode).mkString("?", "&", ""))
