@@ -90,7 +90,7 @@ final class UrlExpander(config: ExpanderConfig = ExpanderConfig()) {
   def apply(uri: rl.Uri, onRedirect: Uri => Unit = _ => ()): Future[rl.Uri] = {
     val prom = scala.concurrent.Promise[rl.Uri]()
     val u = uri.normalize
-    val req = http.prepareHead(u.asciiString)
+    val req = http.prepareGet(u.asciiString)
     req.execute(new PromiseHandler(u, prom, onRedirect))
     prom.future
   }

@@ -46,7 +46,7 @@ trait UrlCodingUtils {
     while (in.hasRemaining) {
       val b = in.get() & 0xFF
       if (toSkip.contains(b)) {
-        out.put(b.toInt.toChar)
+        out.put(b.toChar)
       } else if (b == space && spaceIsPlus) {
         out.put('+')
       } else {
