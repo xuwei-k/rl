@@ -58,7 +58,6 @@ object RlSettings {
   )
 
   val buildSettings = Defaults.defaultSettings ++ Seq(
-      version := buildVersion,
       organization := buildOrganization,
       scalaVersion := buildScalaVersion,
       javacOptions ++= Seq("-Xlint:unchecked"),

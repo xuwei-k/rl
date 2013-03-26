@@ -1,4 +1,4 @@
-# The Mojolly/BackChat.io RL library
+# The Scalatra RL library
 
 This is a url utility library that parses URL's conforming to [RFC-3986](http://tools.ietf.org/html/rfc3986).
 
@@ -42,9 +42,6 @@ Patches are gladly accepted from their original author. Along with any patches, 
 
 ## License
 MIT licensed. check the [LICENSE](https://github.com/mojolly/rl/blob/master/LICENSE) file
-
-## TODO
-Make the parsers pluggable so that the scala parser combinator based one can be replaced as it's slow as.
 
 ```
 
