@@ -32,7 +32,7 @@ object ShellPrompt {
 
 object RlSettings {
   val buildOrganization = "org.scalatra.rl"
-  val buildScalaVersion = "2.9.2"
+  val buildScalaVersion = "2.9.3"
   val buildVersion      = "0.4.3"
 //
 //  lazy val formatSettings = ScalariformPlugin.scalariformSettings ++ Seq(
@@ -71,8 +71,9 @@ object RlSettings {
       libraryDependencies <+= (scalaVersion) {
         case "2.9.0-1" => "org.specs2" %% "specs2" % "1.8.2" % "test"
         case "2.9.0" => "org.specs2" %% "specs2" % "1.7.1" % "test"
-        case v if v.startsWith("2.9") => "org.specs2" %% "specs2" % "1.12" % "test"
-        case _ => "org.specs2" %% "specs2" % "1.13" % "test"
+        case v if v.startsWith("2.9.1") => "org.specs2" %% "specs2" % "1.12.4" % "test"
+        case v if v.startsWith("2.9") => "org.specs2" %% "specs2" % "1.12.4.1" % "test"
+        case _ => "org.specs2" %% "specs2" % "1.14" % "test"
       },
       libraryDependencies += "junit" % "junit" % "4.10" % "test",
       crossVersion := CrossVersion.binary,
@@ -81,7 +82,7 @@ object RlSettings {
         "Sonatype Snapshots" at "https://oss.sonatype.org/content/repositories/snapshots",
         "Typesafe Releases" at "http://repo.typesafe.com/typesafe/releases/"
       ),
-      crossScalaVersions := Seq("2.9.1", "2.9.0-1", "2.9.0", "2.9.1-1", "2.9.2"),
+      crossScalaVersions := Seq("2.9.1", "2.9.0-1", "2.9.0", "2.9.1-1", "2.9.2", "2.9.3"),
 //      (excludeFilter in format) <<= (excludeFilter) (_ || "*Spec.scala"),
       libraryDependencies ++= compilerPlugins,
       artifact in (Compile, packageBin) ~= { (art: Artifact) =>
@@ -173,7 +174,8 @@ object RlBuild extends Build {
   lazy val root = Project ("rl-project", file("."),
                           settings = Project.defaultSettings ++ unpublished ++ Seq(
                             name := "rl-project",
-                            crossScalaVersions := Seq("2.9.1", "2.9.0-1", "2.9.0", "2.9.1-1", "2.9.2")
+                            scalaVersion := "2.9.3",
+                            crossScalaVersions := Seq("2.9.1", "2.9.0-1", "2.9.0", "2.9.1-1", "2.9.2", "2.9.3")
                           )) aggregate(core, followRedirects)
 
   lazy val core = Project ("rl", file("core"), settings = projectSettings ++ buildInfoSettings ++ Seq(
