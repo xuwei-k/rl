@@ -50,7 +50,7 @@ trait NettyHttpServerContext {
 
     override def exceptionCaught(ctx: ChannelHandlerContext, e: ExceptionEvent) {
       //      e.getCause.printStackTrace()
-      try { e.getChannel.close() } catch { case _ ⇒ }
+      try { e.getChannel.close() } catch { case _: Throwable ⇒ }
     }
   }
 

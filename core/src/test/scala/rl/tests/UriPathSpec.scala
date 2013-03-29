@@ -32,12 +32,12 @@ class UriPathSpec extends Specification {
 
 class AboutAbsolutePaths extends Specification with DataTables with ResultMatchers { def is =
   "Absolute paths" ^
-  "always start and end with a slash unless they are empty" ! {
-    val empty : List[String] = List()
-    "path segments"     | "expected" |>
-     empty              !  ""        |
-     List("a")          !  "/a/"     |
-     List("a", "b")     !  "/a/b/"   |
-     { (segments, expected) => AbsolutePath(segments).uriPart must_== expected }
-  } ^ end
+    "always start and end with a slash unless they are empty" ! {
+      val empty : List[String] = List()
+      "path segments"     | "expected" |>
+       empty              !  ""        |
+       List("a")          !  "/a/"     |
+       List("a", "b")     !  "/a/b/"   |
+       { (segments, expected) => AbsolutePath(segments).uriPart must_== expected }
+    } ^ end
 }

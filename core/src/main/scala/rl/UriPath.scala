@@ -21,6 +21,27 @@ trait UriPath extends UriNode {
   def normalize: UriPath
 
   def apply() = uriPart
+
+  protected[this] def startSeparator = UriPath.unixSeparator
+
+  protected[this] def toUriPart(endSeparator: String = UriPath.unixSeparator) = {
+    val l = segments.size
+    if (l == 0) ""
+    else {
+      val sb = new StringBuilder
+      var i = 0
+      while(i < l) {
+        if (i > 0) sb.append(UriPath.unixSeparator)
+        else sb.append(startSeparator)
+        sb.append(segments(i))
+        i += 1
+      }
+      sb.append(endSeparator)
+      sb.toString()
+    }
+  }
+
+  def uriPartWithoutTrailingSlash = toUriPart("")
 }
 
 trait EmptyUriPath extends UriPath {
@@ -42,7 +63,10 @@ case class RelativePath(segments: GenSeq[String]) extends UriPath {
 
   val isRelative: Boolean = true
 
-  val uriPart = segments map { UrlCodingUtils.ensureUrlEncoding(_) } mkString ("", UriPath.unixSeparator, UriPath.unixSeparator)
+
+  override protected[this] def startSeparator: String = ""
+
+  val uriPart = toUriPart()
 
   def normalize = RelativePath(collapseDots())
 }
@@ -51,16 +75,11 @@ case class AbsolutePath(segments: GenSeq[String]) extends UriPath {
 
   val isRelative: Boolean = false
 
-  val uriPart = toUriPart
+  val uriPart = toUriPart()
 
   def normalize = AbsolutePath(collapseDots())
 
-  private def toUriPart = {
-    if (segments.size == 0) "" else
-      segments map { UrlCodingUtils.ensureUrlEncoding(_) } mkString (UriPath.unixSeparator,
-        UriPath.unixSeparator,
-        UriPath.unixSeparator)
-  }
+
 }
 trait PathOps {
 
