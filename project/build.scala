@@ -24,7 +24,7 @@ object ShellPrompt {
     (state: State) => {
       val currBranch = current findFirstMatchIn gitBranches map (_ group(1)) getOrElse "-"
       val currProject = Project.extract (state).currentProject.id
-      "%s:%s:%s> ".format (currBranch, currProject, RlSettings.buildVersion)
+      "%s:%s> ".format (currBranch, currProject)
     }
   }
 
@@ -33,7 +33,6 @@ object ShellPrompt {
 object RlSettings {
   val buildOrganization = "org.scalatra.rl"
   val buildScalaVersion = "2.9.3"
-  val buildVersion      = "0.4.3"
 //
 //  lazy val formatSettings = ScalariformPlugin.scalariformSettings ++ Seq(
 //     preferences in Compile := formattingPreferences,
@@ -58,7 +57,6 @@ object RlSettings {
   )
 
   val buildSettings = Defaults.defaultSettings ++ Seq(
-      version := buildVersion,
       organization := buildOrganization,
       scalaVersion := buildScalaVersion,
       javacOptions ++= Seq("-Xlint:unchecked"),

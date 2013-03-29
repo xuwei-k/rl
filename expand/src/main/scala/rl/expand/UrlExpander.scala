@@ -81,7 +81,7 @@ object UrlExpander {
 
           (new FilterContext.FilterContextBuilder[Uri]()
             asyncHandler h
-            request new RequestBuilder("GET", true).setUrl(h.current).build()
+            request new RequestBuilder(ctx.getRequest.getMethod, true).setUrl(h.current).build()
             replayRequest true).build()
 
         case h: PromiseHandler if RedirectCodes.contains(ctx.getResponseStatus.getStatusCode) =>
