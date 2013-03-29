@@ -69,8 +69,8 @@ object RlSettings {
         "-Xcheckinit",
         "-encoding", "utf8"),
       libraryDependencies <+= (scalaVersion) {
-        case "2.9.0-1" => "org.specs2" %% "specs2" % "1.8.2" % "test"
         case "2.9.0" => "org.specs2" %% "specs2" % "1.7.1" % "test"
+        case "2.9.0-1" => "org.specs2" %% "specs2" % "1.8.2" % "test"
         case v if v.startsWith("2.9.1") => "org.specs2" %% "specs2" % "1.12.4" % "test"
         case v if v.startsWith("2.9") => "org.specs2" %% "specs2" % "1.12.4.1" % "test"
         case _ => "org.specs2" %% "specs2" % "1.14" % "test"
@@ -82,7 +82,7 @@ object RlSettings {
         "Sonatype Snapshots" at "https://oss.sonatype.org/content/repositories/snapshots",
         "Typesafe Releases" at "http://repo.typesafe.com/typesafe/releases/"
       ),
-      crossScalaVersions := Seq("2.9.1", "2.9.0-1", "2.9.0", "2.9.1-1", "2.9.2", "2.9.3"),
+      crossScalaVersions := Seq("2.9.0", "2.9.0-1", "2.9.1", "2.9.1-1", "2.9.2", "2.9.3"),
 //      (excludeFilter in format) <<= (excludeFilter) (_ || "*Spec.scala"),
       libraryDependencies ++= compilerPlugins,
       artifact in (Compile, packageBin) ~= { (art: Artifact) =>
@@ -196,8 +196,17 @@ object RlBuild extends Build {
   lazy val followRedirects = Project("rl-expand", file("expand"), settings = projectSettings ++ Seq(
     name := "rl-expander",
     description := "Expands urls when they appear shortened",
-    libraryDependencies += "com.ning" % "async-http-client" % "1.7.8",
-    libraryDependencies += "com.typesafe.akka" % "akka-actor" % "2.0.5"
+    libraryDependencies += "com.ning" % "async-http-client" % "1.7.12",
+    libraryDependencies += "com.typesafe.akka" % "akka-actor" % "2.0.5",
+    libraryDependencies += "org.slf4j" % "slf4j-api" % "1.7.5",
+    libraryDependencies += "ch.qos.logback" % "logback-classic" % "1.0.11" % "provided",
+    initialCommands in console :=
+      """
+        |import rl._
+        |import expand._
+        |import akka.util.duration._
+        |import akka.dispatch._
+      """.stripMargin
   )) dependsOn (core)
 
 }

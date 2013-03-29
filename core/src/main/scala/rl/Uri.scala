@@ -37,9 +37,15 @@ trait Uri {
   def normalize: Uri = normalize(false)
   def normalize(stripCommonPrefixFromHost: Boolean = false): Uri
 
+  def asciiStringWithoutTrailingSlash = {
+    scheme.uriPart + authority.map(_.uriPart).getOrElse("") + segments.uriPartWithoutTrailingSlash + query.uriPart + fragment.uriPart
+  }
+
   def asciiString = {
     scheme.uriPart + authority.map(_.uriPart).getOrElse("") + segments.uriPart + query.uriPart + fragment.uriPart
   }
+
+  private[this] def ensureTrailingSlash(part: String) = if (part endsWith "/") part else part + "/"
 }
 
 case class AbsoluteUri(scheme: Scheme, authority: Option[Authority], segments: UriPath, query: QueryString, fragment: UriFragment, originalUri: String = "") extends Uri {
