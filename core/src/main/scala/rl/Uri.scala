@@ -100,7 +100,7 @@ object Uri {
 
   def apply(uriString: String): Uri = {
     try {
-      apply(URI.create(uriString))
+      apply(URI.create(UrlCodingUtils.ensureUrlEncoding(uriString)))
     } catch {
       case e: URISyntaxException ⇒ {
         FailedUri(e, uriString)
