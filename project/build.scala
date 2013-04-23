@@ -32,7 +32,11 @@ object ShellPrompt {
 
 object RlSettings {
   val buildOrganization = "org.scalatra.rl"
+<<<<<<< HEAD
   val buildScalaVersion = "2.10.0"
+=======
+  val buildScalaVersion = "2.9.3"
+>>>>>>> next
 //
 //  lazy val formatSettings = ScalariformPlugin.scalariformSettings ++ Seq(
 //     preferences in Compile := formattingPreferences,
@@ -194,7 +198,7 @@ object RlBuild extends Build {
   lazy val followRedirects = Project("rl-expand", file("expand"), settings = projectSettings ++ Seq(
     name := "rl-expander",
     description := "Expands urls when they appear shortened",
-    libraryDependencies += "com.ning" % "async-http-client" % "1.7.12",
+    libraryDependencies += "com.ning" % "async-http-client" % "1.7.13",
     libraryDependencies += "org.slf4j" % "slf4j-api" % "1.7.5",
     libraryDependencies += "ch.qos.logback" % "logback-classic" % "1.0.11" % "provided",
     initialCommands in console :=

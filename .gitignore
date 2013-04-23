@@ -38,3 +38,4 @@ rl.sublime-project
 src/main/resources/rl/tld_names.dat
 tld_names.dat
 atlassian-ide-plugin.xml
+.lib

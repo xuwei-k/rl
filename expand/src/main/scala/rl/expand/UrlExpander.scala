@@ -75,12 +75,12 @@ object UrlExpander {
           h.count += 1
 
           val newUri = ctx.getResponseHeaders.getHeaders.getFirstValue("Location")
-          h.current = rl.Uri(newUri).normalize.asciiStringWithoutTrailingSlash
+          h.current = rl.Uri(rl.UrlCodingUtils.ensureUrlEncoding(newUri)).normalize.asciiStringWithoutTrailingSlash
           if (logger.isDebugEnabled) logger.debug("Received a redirect, going to %s.".format(newUri))
 
           (new FilterContext.FilterContextBuilder[Uri]()
             asyncHandler h
-            request new RequestBuilder("GET", true).setUrl(h.current).build()
+            request new RequestBuilder(ctx.getRequest.getMethod, true).setUrl(h.current).build()
             replayRequest true).build()
 
         case h: PromiseHandler if RedirectCodes.contains(ctx.getResponseStatus.getStatusCode) =>
