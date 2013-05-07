@@ -100,7 +100,6 @@ object Uri {
 
   def apply(uriString: String): Uri = {
     try {
-//      val UriParts(_, scheme, _, authority, path, _, qs, _, frag) = uriString
       apply(URI.create(uriString))
     } catch {
       case e: URISyntaxException ⇒ {

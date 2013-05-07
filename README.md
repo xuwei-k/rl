@@ -1,4 +1,4 @@
-# The Mojolly/BackChat.io RL library
+# RL
 
 This is a url utility library that parses URL's conforming to [RFC-3986](http://tools.ietf.org/html/rfc3986).
 
@@ -41,7 +41,7 @@ expandUrl.stop() // stop thread pools etc.
 Patches are gladly accepted from their original author. Along with any patches, please state that the patch is your original work and that you license the work to the *rl* project under the MIT License.
 
 ## License
-MIT licensed. check the [LICENSE](https://github.com/mojolly/rl/blob/master/LICENSE) file
+MIT licensed. check the [LICENSE](https://github.com/scalatra/rl/blob/master/LICENSE) file
 
 ## TODO
 Make the parsers pluggable so that the scala parser combinator based one can be replaced as it's slow as.
