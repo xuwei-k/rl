@@ -100,7 +100,8 @@ object Uri {
 
   def apply(uriString: String): Uri = {
     try {
-      apply(URI.create(UrlCodingUtils.ensureUrlEncoding(uriString)))
+//      val UriParts(_, scheme, _, authority, path, _, qs, _, frag) = uriString
+      apply(URI.create(uriString))
     } catch {
       case e: URISyntaxException ⇒ {
         FailedUri(e, uriString)
@@ -113,7 +114,7 @@ object Uri {
 
   def apply(u: URI, originalUri: Option[String] = None): Uri = {
     try {
-      val pth = parsePath(u.getRawPath.blankOption)
+      val pth = parsePath(u.getRawPath.blankOption map UrlCodingUtils.ensureUrlEncoding)
 
       if (u.isAbsolute) {
         AbsoluteUri(

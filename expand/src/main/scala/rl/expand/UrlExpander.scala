@@ -67,9 +67,22 @@ object UrlExpander {
   class DestinationNotFound(val current: String) extends Exception("The final url [%s] no longer exists." format current)
 
   private class RedirectFilter extends ResponseFilter {
+    private[this] def wantsTrailingSlash(ctx: FilterContext[_], h: PromiseHandler): Boolean =
+      RedirectCodes.contains(ctx.getResponseStatus.getStatusCode) && h.canRedirect && {
+        ctx.getResponseHeaders.getHeaders.getFirstValue("Location") == h.current + "/"
+      }
+
     @transient private[this] val logger = LoggerFactory.getLogger("rl.expand.RedirectFilter")
     def filter(ctx: FilterContext[_]): FilterContext[_] = {
       ctx.getAsyncHandler match {
+        case h: PromiseHandler if wantsTrailingSlash(ctx, h) =>
+          h.seen404 = true
+          val newUri = h.current + "/"
+          h.current = newUri
+          (new FilterContext.FilterContextBuilder[Uri]()
+            asyncHandler h
+            request new RequestBuilder("GET", true).setUrl(newUri).build()
+            replayRequest true).build()
         case h: PromiseHandler if RedirectCodes.contains(ctx.getResponseStatus.getStatusCode) && h.canRedirect =>
           h.seen404 = false
           h.onRedirect(rl.Uri(h.current))
@@ -144,8 +157,16 @@ final class UrlExpander(config: ExpanderConfig = ExpanderConfig()) {
   def apply(uri: String): Future[rl.Uri] = apply(rl.Uri(uri), (_: rl.Uri) => ())
   def apply(uri: String, onRedirect: Uri => Unit): Future[rl.Uri] = apply(rl.Uri(uri), onRedirect)
   def apply(uri: rl.Uri, onRedirect: Uri => Unit = _ => ()): Future[rl.Uri] = {
+    val uu: rl.Uri = uri match {
+      case abs: AbsoluteUri => abs
+      case RelativeUri(None, _, _, _, _) =>
+        sys.error("The uri "+ uri +" needs to have a host at the very least")
+      case RelativeUri(h, s, q, f, o) => AbsoluteUri(Scheme("http"), h, s, q, f, o)
+      case _ =>
+        sys.error("The uri "+ uri +" needs to have a host at the very least")
+    }
     val prom = akka.dispatch.Promise[rl.Uri]()
-    val u = uri.normalize.asciiStringWithoutTrailingSlash
+    val u = uu.normalize.asciiStringWithoutTrailingSlash
     val req = http.prepareGet(u)
     req.execute(new PromiseHandler(u, 0, config.maximumResolveSteps, prom, onRedirect))
     prom.future
