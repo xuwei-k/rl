@@ -106,5 +106,48 @@ class UrlExpanderspec extends org.specs2.mutable.Specification with NoTimeConver
         expand.stop()
       }
     }
+
+    "not expand urls that return a 200" in {
+      val server = new NettyHttpServerContext {
+        def handleRequest(ctx: ChannelHandlerContext, req: HttpRequest) {
+          writeResponse(ctx, "done")
+        }
+      }
+      server.start
+      val expand = UrlExpander()
+      try {
+        Await.result(expand(Uri("http://127.0.0.1:"+server.port+"/")), 5 seconds) must_== Uri("http://127.0.0.1:"+server.port)
+      } finally {
+        server.stop
+        expand.stop()
+      }
+    }
+//
+//    "add the http scheme if no scheme provided" in {
+//       val expand = UrlExpander()
+//      try {
+//        Await.result(expand(Uri("www.dressaday.com/2012/11/01/autumn-9929/")), 5 seconds) must_== Uri("http://www.dressaday.com/2012/11/01/autumn-9929/")
+//      } finally {
+//        expand.stop()
+//      }
+//    }
+
+    "expand urls that have invalid chars in them" in {
+      val expand = UrlExpander()
+      try {
+        Await.result(expand(Uri("http://bit.ly/ZvTH4o")), 5 seconds) must_== Uri("http://theweek.com/article/index/242212%20/why-the-associated-press-is-dropping-il%20legal-immigrant-from-its-lexicon")
+      } finally {
+        expand.stop()
+      }
+    }
+
+    "not expand dressaday.com urls that return a 200" in {
+      val expand = UrlExpander()
+      try {
+        Await.result(expand(Uri("http://www.dressaday.com/2012/11/01/autumn-9929/")), 5 seconds) must_== Uri("http://www.dressaday.com/2012/11/01/autumn-9929/")
+      } finally {
+        expand.stop()
+      }
+    }
   }
 }
