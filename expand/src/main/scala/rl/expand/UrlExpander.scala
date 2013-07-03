@@ -11,6 +11,8 @@ import com.ning.http.client.AsyncHandler.STATE
 import scala.concurrent.duration._
 import scala.concurrent.{Future, ExecutionContext, Promise}
 import org.slf4j.LoggerFactory
+import collection.JavaConverters._
+import scala.collection.mutable.ListBuffer
 
 case class ExpanderConfig(
              maximumResolveSteps: Int = 15,
@@ -18,7 +20,8 @@ case class ExpanderConfig(
              maxConnectionsPerHost: Int = 5,
              threadPoolSize: Int = 200,
              requestTimeout: Duration = 30.seconds,
-             userAgent: String = "Scalatra RL Expander/%s".format(BuildInfo.version))
+             userAgent: String = "Googlebot/2.1 (+http://www.google.com/bot.html)")
+//             userAgent: String = "Scalatra RL Expander/%s".format(BuildInfo.version))
 
 object UrlExpander {
 
@@ -39,20 +42,18 @@ object UrlExpander {
 
   private val RedirectCodes = Vector(301, 302, 303, 307)
 
-  private class PromiseHandler(var current: String, var count: Int, val max: Int, val promise: Promise[Uri], val onRedirect: Uri => Unit) extends AsyncHandler[Uri] {
-
+  private class PromiseHandler(var current: String, var count: Int, val max: Int, val promise: Promise[(Uri, Boolean)], val onRedirect: Uri => Unit) extends AsyncHandler[(Uri, Boolean)] {
     var seen404 = false
+    def canRedirect = count < max
     def onThrowable(t: Throwable) { promise failure t }
     def onBodyPartReceived(bodyPart: HttpResponseBodyPart): STATE = STATE.CONTINUE
     def onStatusReceived(responseStatus: HttpResponseStatus): STATE = STATE.CONTINUE
     def onHeadersReceived(headers: HttpResponseHeaders): STATE = STATE.CONTINUE
-    def onCompleted(): Uri = {
-      val uu = rl.Uri(current)
+    def onCompleted(): (Uri, Boolean) = {
+      val uu = (rl.Uri(current), seen404)
       promise success uu
       uu
     }
-
-    def canRedirect = count < max
   }
 
   object RedirectsExhausted {
@@ -68,7 +69,8 @@ object UrlExpander {
   private class RedirectFilter extends ResponseFilter {
     private[this] def wantsTrailingSlash(ctx: FilterContext[_], h: PromiseHandler): Boolean =
       RedirectCodes.contains(ctx.getResponseStatus.getStatusCode) && h.canRedirect && {
-        ctx.getResponseHeaders.getHeaders.getFirstValue("Location") == h.current + "/"
+        val v = ctx.getResponseHeaders.getHeaders.getFirstValue("Location")
+        v == h.current + "/" || v == rl.Uri(h.current).segments.uriPartWithoutTrailingSlash + "/"
       }
 
     @transient private[this] val logger = LoggerFactory.getLogger("rl.expand.RedirectFilter")
@@ -78,22 +80,35 @@ object UrlExpander {
           h.seen404 = true
           val newUri = h.current + "/"
           h.current = newUri
-          (new FilterContext.FilterContextBuilder[Uri]()
+          val req = {
+            val b = new RequestBuilder(ctx.getRequest.getMethod, true).setUrl(newUri)
+            b.build()
+          }
+          (new FilterContext.FilterContextBuilder[(Uri, Boolean)]()
             asyncHandler h
-            request new RequestBuilder("GET", true).setUrl(newUri).build()
+            request req
             replayRequest true).build()
         case h: PromiseHandler if RedirectCodes.contains(ctx.getResponseStatus.getStatusCode) && h.canRedirect =>
           h.seen404 = false
           h.onRedirect(rl.Uri(h.current))
           h.count += 1
+          val newUri = rl.UrlCodingUtils.ensureUrlEncoding(ctx.getResponseHeaders.getHeaders.getFirstValue("Location"))
 
-          val newUri = ctx.getResponseHeaders.getHeaders.getFirstValue("Location")
-          h.current = rl.Uri(rl.UrlCodingUtils.ensureUrlEncoding(newUri)).normalize.asciiStringWithoutTrailingSlash
+          val uu = if(newUri.startsWith("http") || newUri.startsWith("ws")) {
+            rl.Uri(newUri)
+          } else rl.Uri(h.current).withPath(newUri)
+
+          h.current = uu.normalize.asciiStringWithoutTrailingSlash
+          val req = {
+            val b = new RequestBuilder(ctx.getRequest.getMethod, true).setUrl(h.current)
+            b.build()
+          }
+
           if (logger.isDebugEnabled) logger.debug("Received a redirect, going to %s.".format(newUri))
 
-          (new FilterContext.FilterContextBuilder[Uri]()
+          (new FilterContext.FilterContextBuilder[(Uri, Boolean)]()
             asyncHandler h
-            request new RequestBuilder(ctx.getRequest.getMethod, true).setUrl(h.current).build()
+            request req
             replayRequest true).build()
 
         case h: PromiseHandler if RedirectCodes.contains(ctx.getResponseStatus.getStatusCode) =>
@@ -104,9 +119,13 @@ object UrlExpander {
           h.seen404 = true
           val newUri = h.current + "/"
           h.current = newUri
-          (new FilterContext.FilterContextBuilder[Uri]()
+          val req = {
+            val b = new RequestBuilder(ctx.getRequest.getMethod, true).setUrl(newUri)
+            b.build()
+          }
+          (new FilterContext.FilterContextBuilder[(Uri, Boolean)]()
             asyncHandler h
-            request new RequestBuilder("GET", true).setUrl(newUri).build()
+            request req
             replayRequest true).build()
 
         case h: PromiseHandler if ctx.getResponseStatus.getStatusCode == 404 =>
@@ -153,9 +172,9 @@ final class UrlExpander(config: ExpanderConfig = ExpanderConfig()) {
   private[this] val http = new AsyncHttpClient(httpConfig)
   sys.addShutdownHook(stop())
 
-  def apply(uri: String): Future[rl.Uri] = apply(rl.Uri(uri), (_: rl.Uri) => ())
-  def apply(uri: String, onRedirect: Uri => Unit): Future[rl.Uri] = apply(rl.Uri(uri), onRedirect)
-  def apply(uri: rl.Uri, onRedirect: Uri => Unit = _ => ()): Future[rl.Uri] = {
+  def apply(uri: String): Future[String] = apply(rl.Uri(uri), (_: rl.Uri) => ())
+  def apply(uri: String, onRedirect: Uri => Unit): Future[String] = apply(rl.Uri(uri), onRedirect)
+  def apply(uri: rl.Uri, onRedirect: Uri => Unit = _ => ()): Future[String] = {
     val uu: rl.Uri = uri match {
       case abs: AbsoluteUri => abs
       case RelativeUri(None, _, _, _, _) =>
@@ -164,11 +183,13 @@ final class UrlExpander(config: ExpanderConfig = ExpanderConfig()) {
       case _ =>
         sys.error("The uri "+ uri +" needs to have a host at the very least")
     }
-    val prom = scala.concurrent.Promise[rl.Uri]()
+    val prom = scala.concurrent.Promise[(Uri, Boolean)]()
     val u = uu.normalize.asciiStringWithoutTrailingSlash
     val req = http.prepareGet(u)
     req.execute(new PromiseHandler(u, 0, config.maximumResolveSteps, prom, onRedirect))
-    prom.future
+    prom.future map {
+      case (ru, trail) => if (trail) ru.asciiString else ru.asciiStringWithoutTrailingSlash
+    }
   }
 
   def stop() {

@@ -36,6 +36,7 @@ trait Uri {
   def isRelative: Boolean
   def normalize: Uri = normalize(false)
   def normalize(stripCommonPrefixFromHost: Boolean = false): Uri
+  def withPath(path: String): this.type
 
   def asciiStringWithoutTrailingSlash = {
     scheme.uriPart + authority.map(_.uriPart).getOrElse("") + segments.uriPartWithoutTrailingSlash + query.uriPart + fragment.uriPart
@@ -54,6 +55,8 @@ case class AbsoluteUri(scheme: Scheme, authority: Option[Authority], segments: U
 
   def normalize(stripCommonPrefixFromHost: Boolean = false) =
     copy(scheme.normalize, authority.map(_.normalize(stripCommonPrefixFromHost)), segments.normalize, query.normalize, fragment.normalize)
+  def withPath(path: String): this.type =
+    copy(segments = UriPath.parsePath(path.blankOption map UrlCodingUtils.ensureUrlEncoding).normalize).asInstanceOf[this.type]
 }
 
 case class RelativeUri(authority: Option[Authority], segments: UriPath, query: QueryString, fragment: UriFragment, originalUri: String = "") extends Uri {
@@ -64,6 +67,9 @@ case class RelativeUri(authority: Option[Authority], segments: UriPath, query: Q
 
   def normalize(stripCommonPrefixFromHost: Boolean = false) =
     copy(authority.map(_.normalize(stripCommonPrefixFromHost)), segments.normalize, query.normalize, fragment.normalize)
+
+  def withPath(path: String): this.type =
+    copy(segments = UriPath.parsePath(path.blankOption map UrlCodingUtils.ensureUrlEncoding).normalize).asInstanceOf[this.type]
 }
 
 case class FailedUri(throwable: Throwable, originalUri: String = "") extends Uri {
@@ -88,6 +94,8 @@ case class FailedUri(throwable: Throwable, originalUri: String = "") extends Uri
   val isAbsolute: Boolean = false
 
   def normalize(stripCommonPrefixFromHost: Boolean = false) = this
+
+  def withPath(path: String): this.type = this
 }
 
 object Uri {
@@ -113,7 +121,7 @@ object Uri {
 
   def apply(u: URI, originalUri: Option[String] = None): Uri = {
     try {
-      val pth = parsePath(u.getRawPath.blankOption map UrlCodingUtils.ensureUrlEncoding)
+      val pth = UriPath.parsePath(u.getRawPath.blankOption map UrlCodingUtils.ensureUrlEncoding)
 
       if (u.isAbsolute) {
         AbsoluteUri(
@@ -141,12 +149,5 @@ object Uri {
     }
   }
 
-  private def parsePath(text: Option[String]): UriPath = {
-    text match {
-      case None                           ⇒ EmptyPath
-      case Some(pt) if pt.trim == "/"     ⇒ EmptyPath
-      case Some(pt) if pt.startsWith("/") ⇒ AbsolutePath(pt.split("/").drop(1).toList)
-      case Some(pt)                       ⇒ RelativePath(pt.split("/"))
-    }
-  }
+
 }

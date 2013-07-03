@@ -99,6 +99,15 @@ trait PathOps {
   private def convertWindowsToUnixPath(path: String) = {
     path.replace(windowsSeparator, unixSeparator).replace(" ", "%20")
   }
+
+  def parsePath(text: Option[String]): UriPath = {
+    text match {
+      case None                           ⇒ EmptyPath
+      case Some(pt) if pt.trim == "/"     ⇒ EmptyPath
+      case Some(pt) if pt.startsWith("/") ⇒ AbsolutePath(pt.split("/").drop(1).toList)
+      case Some(pt)                       ⇒ RelativePath(pt.split("/"))
+    }
+  }
 }
 
 object UriPath extends PathOps

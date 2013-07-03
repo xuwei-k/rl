@@ -43,7 +43,7 @@ class UrlExpanderspec extends org.specs2.mutable.Specification with NoTimeConver
       server.start
       val expand = UrlExpander()
       try {
-        Await.result(expand(Uri("http://127.0.0.1:"+server.port+"/")), 5 seconds) must_== Uri("http://127.0.0.1:"+server.port+"/3")
+        Await.result(expand(Uri("http://127.0.0.1:"+server.port+"/")), 5 seconds) must_== "http://127.0.0.1:"+server.port+"/3"
         count must be_==(3)
       } finally {
         server.stop
@@ -71,7 +71,7 @@ class UrlExpanderspec extends org.specs2.mutable.Specification with NoTimeConver
       server.start
       val expand = UrlExpander()
       try {
-        Await.result(expand(Uri("http://127.0.0.1:"+server.port+"/")), 5 seconds) must_== Uri("http://127.0.0.1:"+server.port+"/3")
+        Await.result(expand(Uri("http://127.0.0.1:"+server.port+"/")), 5 seconds) must_== "http://127.0.0.1:"+server.port+"/3"
         count must be_==(3)
       } finally {
         server.stop
@@ -116,7 +116,7 @@ class UrlExpanderspec extends org.specs2.mutable.Specification with NoTimeConver
       server.start
       val expand = UrlExpander()
       try {
-        Await.result(expand(Uri("http://127.0.0.1:"+server.port+"/")), 5 seconds) must_== Uri("http://127.0.0.1:"+server.port)
+        Await.result(expand(Uri("http://127.0.0.1:"+server.port+"/")), 5 seconds) must_== "http://127.0.0.1:"+server.port
       } finally {
         server.stop
         expand.stop()
@@ -135,7 +135,7 @@ class UrlExpanderspec extends org.specs2.mutable.Specification with NoTimeConver
     "expand urls that have invalid chars in them" in {
       val expand = UrlExpander()
       try {
-        Await.result(expand(Uri("http://bit.ly/ZvTH4o")), 5 seconds) must_== Uri("http://theweek.com/article/index/242212%20/why-the-associated-press-is-dropping-il%20legal-immigrant-from-its-lexicon")
+        Await.result(expand(Uri("http://bit.ly/ZvTH4o")), 5 seconds) must_== "http://theweek.com/article/index/242212%20/why-the-associated-press-is-dropping-il%20legal-immigrant-from-its-lexicon"
       } finally {
         expand.stop()
       }
@@ -144,7 +144,7 @@ class UrlExpanderspec extends org.specs2.mutable.Specification with NoTimeConver
     "not expand dressaday.com urls that return a 200" in {
       val expand = UrlExpander()
       try {
-        Await.result(expand(Uri("http://www.dressaday.com/2012/11/01/autumn-9929/")), 5 seconds) must_== Uri("http://www.dressaday.com/2012/11/01/autumn-9929/")
+        Await.result(expand(Uri("http://www.dressaday.com/2012/11/01/autumn-9929/")), 5 seconds) must_== "http://www.dressaday.com/2012/11/01/autumn-9929/"
       } finally {
         expand.stop()
       }
