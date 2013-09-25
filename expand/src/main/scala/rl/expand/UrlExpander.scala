@@ -189,7 +189,7 @@ final class UrlExpander(config: ExpanderConfig = ExpanderConfig()) {
     val req = http.prepareGet(u)
     req.execute(new PromiseHandler(u, 0, config.maximumResolveSteps, prom, onRedirect))
     prom.future map {
-      case (ru, trail) => if (trail) ru.asciiString else ru.asciiStringWithoutTrailingSlash
+      case (ru, trail) => if (trail) ru.normalize.asciiString else ru.normalize.asciiStringWithoutTrailingSlash
     }
   }
 
