@@ -2,6 +2,7 @@ import sbt._
 import Keys._
 import scala.xml._
 import sbtbuildinfo.Plugin._
+import com.typesafe.sbt.pgp.PgpKeys._
 //import com.typesafe.sbtscalariform._
 //import ScalariformPlugin._
 //import ScalariformKeys._
@@ -166,7 +167,11 @@ object RlBuild extends Build {
     publishArtifact in makePom := false,
     // can't seem to get rid of ivy files except by no-op'ing the entire publish task
     publish := {},
-    publishLocal := {}
+    publishSigned := {},
+    publishLocalSigned := {},
+    publishLocal := {},
+    publishLocalSignedConfiguration := null,
+    publishSignedConfiguration := null
   )
 
   lazy val root = Project ("rl-project", file("."),
