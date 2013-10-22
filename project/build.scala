@@ -206,8 +206,6 @@ object RlBuild extends Build {
       """
         |import rl._
         |import expand._
-        |import akka.util.duration._
-        |import akka.dispatch._
       """.stripMargin
   )) dependsOn (core)
 
