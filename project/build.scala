@@ -199,7 +199,7 @@ object RlBuild extends Build {
   lazy val followRedirects = Project("rl-expand", file("expand"), settings = projectSettings ++ Seq(
     name := "rl-expander",
     description := "Expands urls when they appear shortened",
-    libraryDependencies += "com.ning" % "async-http-client" % "1.7.17",
+    libraryDependencies += "com.ning" % "async-http-client" % "1.7.21",
     libraryDependencies += "com.typesafe.akka" % "akka-actor" % "2.0.5",
     libraryDependencies += "org.slf4j" % "slf4j-api" % "1.7.5",
     libraryDependencies += "ch.qos.logback" % "logback-classic" % "1.0.11" % "provided",

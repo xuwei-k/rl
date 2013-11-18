@@ -71,7 +71,8 @@ object UrlExpander {
     private[this] def wantsTrailingSlash(ctx: FilterContext[_], h: PromiseHandler): Boolean =
       RedirectCodes.contains(ctx.getResponseStatus.getStatusCode) && h.canRedirect && {
         val v = ctx.getResponseHeaders.getHeaders.getFirstValue("Location")
-        v == h.current + "/" || v == rl.Uri(h.current).segments.uriPartWithoutTrailingSlash + "/"
+        val newUri = if(h.current.contains("?")) h.current.replace("?","/?") else h.current + "/"
+        v == newUri || v == rl.Uri(newUri).segments.uriPartWithoutTrailingSlash + "/"
       }
 
     @transient private[this] val logger = LoggerFactory.getLogger("rl.expand.RedirectFilter")
@@ -79,7 +80,7 @@ object UrlExpander {
       ctx.getAsyncHandler match {
         case h: PromiseHandler if wantsTrailingSlash(ctx, h) =>
           h.seen404 = true
-          val newUri = h.current + "/"
+          val newUri = if(h.current.contains("?")) h.current.replace("?","/?") else h.current + "/"
           h.current = newUri
           val req = {
             val b = new RequestBuilder(ctx.getRequest.getMethod, true).setUrl(newUri)
