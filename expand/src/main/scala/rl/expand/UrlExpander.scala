@@ -67,39 +67,38 @@ object UrlExpander {
   class DestinationNotFound(val current: String) extends Exception("The final url [%s] no longer exists." format current)
 
   private class RedirectFilter extends ResponseFilter {
-    private[this] def wantsTrailingSlash(ctx: FilterContext[_], h: PromiseHandler): Boolean =
-      RedirectCodes.contains(ctx.getResponseStatus.getStatusCode) && h.canRedirect && {
-        val v = ctx.getResponseHeaders.getHeaders.getFirstValue("Location")
-        val newUri = if(h.current.contains("?")) h.current.replace("?","/?") else h.current + "/"
-        v == newUri || v == rl.Uri(newUri).segments.uriPartWithoutTrailingSlash + "/"
-      }
+//    private[this] def wantsTrailingSlash(ctx: FilterContext[_], h: PromiseHandler): Boolean =
+//      RedirectCodes.contains(ctx.getResponseStatus.getStatusCode) && h.canRedirect && {
+//        val v = ctx.getResponseHeaders.getHeaders.getFirstValue("Location")
+//        val newUri = if(h.current.contains("?")) h.current.replace("?","/?") else h.current + "/"
+//        v == newUri || v == rl.Uri(newUri).segments.uriPartWithoutTrailingSlash + "/"
+//      }
 
     @transient private[this] val logger = LoggerFactory.getLogger("rl.expand.RedirectFilter")
     def filter(ctx: FilterContext[_]): FilterContext[_] = {
       ctx.getAsyncHandler match {
-        case h: PromiseHandler if wantsTrailingSlash(ctx, h) =>
-          h.seen404 = true
-          val newUri = if(h.current.contains("?")) h.current.replace("?","/?") else h.current + "/"
-          h.current = newUri
-          val req = {
-            val b = new RequestBuilder(ctx.getRequest.getMethod, true).setUrl(newUri)
-            b.build()
-          }
-          (new FilterContext.FilterContextBuilder[(Uri, Boolean)]()
-            asyncHandler h
-            request req
-            replayRequest true).build()
+//        case h: PromiseHandler if wantsTrailingSlash(ctx, h) =>
+//          h.seen404 = true
+//          val newUri = if(h.current.contains("?")) h.current.replace("?","/?") else h.current + "/"
+//          h.current = newUri
+//          val req = {
+//            val b = new RequestBuilder(ctx.getRequest.getMethod, true).setUrl(newUri)
+//            b.build()
+//          }
+//          (new FilterContext.FilterContextBuilder[(Uri, Boolean)]()
+//            asyncHandler h
+//            request req
+//            replayRequest true).build()
         case h: PromiseHandler if RedirectCodes.contains(ctx.getResponseStatus.getStatusCode) && h.canRedirect =>
           h.seen404 = false
           h.onRedirect(rl.Uri(h.current))
           h.count += 1
           val newUri = rl.UrlCodingUtils.ensureUrlEncoding(ctx.getResponseHeaders.getHeaders.getFirstValue("Location"))
 
-          val uu = if(newUri.startsWith("http") || newUri.startsWith("ws")) {
-            rl.Uri(newUri)
-          } else rl.Uri(h.current).withPath(newUri)
+          val uu = if(newUri.startsWith("http") || newUri.startsWith("ws")) newUri
+          else rl.Uri(h.current).withPath(newUri).asciiString
 
-          h.current = uu.normalize.asciiStringWithoutTrailingSlash
+          h.current = uu
           val req = {
             val b = new RequestBuilder(ctx.getRequest.getMethod, true).setUrl(h.current)
             b.build()
