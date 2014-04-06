@@ -18,7 +18,7 @@ class Section_2_1_percent_encoding extends Specification {
       } ^ p ^
       "Section 2.2 Reserved Characters" ^
       "it does not encode general delimiters (gen-delims)" ! {
-        val generalDelimiters = ":/?#[]@"
+        val generalDelimiters = ":/?@"
         urlEncode(generalDelimiters) must_== generalDelimiters
       } ^
       "it does not encode subset delimiters (sub-delims)" ! {

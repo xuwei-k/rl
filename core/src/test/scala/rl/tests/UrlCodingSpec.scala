@@ -10,8 +10,8 @@ class UrlCodingSpec extends Specification {
 
     "Encoding a URI should" ^
       "not change any of the allowed chars" ! {
-        val encoded = urlEncode("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ01234567890!$&'()*+,;=:/?#[]@-._~")
-        encoded must_== "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ01234567890!$&'()*+,;=:/?#[]@-._~"
+        val encoded = urlEncode("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ01234567890!$&'()*+,;=:/?@-._~")
+        encoded must_== "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ01234567890!$&'()*+,;=:/?@-._~"
       } ^
       "uppercase encodings already in a string" ! {
         ensureUppercasedEncodings("hello%3fworld") must_== "hello%3Fworld"
@@ -56,6 +56,6 @@ class UrlCodingSpec extends Specification {
         urlDecode("+", plusIsSpace = false) must_== "+"
       } ^
       "it decodes + as space when the plusIsSpace flag is true" ! {
-        urlDecode("+", plusIsSpace = false) must_== "+"
+        urlDecode("+", plusIsSpace = true) must_== " "
       } ^ end
 }

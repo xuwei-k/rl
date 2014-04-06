@@ -7,9 +7,9 @@ import java.nio.charset.Charset
 import java.nio.{ CharBuffer, ByteBuffer }
 import collection.immutable.BitSet
 
-trait UrlCodingUtils {
+trait UrlCodingUtils { 
 
-  private val toSkip = BitSet((('a' to 'z') ++ ('A' to 'Z') ++ ('0' to '9') ++ "!$&'()*+,;=:/?#[]@-._~".toSet).map(_.toInt): _*)
+  private val toSkip = BitSet((('a' to 'z') ++ ('A' to 'Z') ++ ('0' to '9') ++ "!$&'()*+,;=:/?@-._~".toSet).map(_.toInt): _*)
   private val space = ' '.toInt
   private[rl] val PctEncoded = """%([0-9a-fA-F][0-9a-fA-F])""".r
   private val LowerPctEncoded = """%([0-9a-f][0-9a-f])""".r
