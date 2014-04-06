@@ -144,7 +144,7 @@ class UrlExpanderspec extends org.specs2.mutable.Specification with NoTimeConver
     "not expand dressaday.com urls that return a 200" in {
       val expand = UrlExpander()
       try {
-        Await.result(expand(Uri("http://www.dressaday.com/2012/11/01/autumn-9929/")), 5 seconds) must_== "http://www.dressaday.com/2012/11/01/autumn-9929/"
+        Await.result(expand(Uri("http://www.dressaday.com/2012/11/01/autumn-9929/")), 5 seconds) must_== "http://dressaday.com/2012/11/01/autumn-9929/"
       } finally {
         expand.stop()
       }

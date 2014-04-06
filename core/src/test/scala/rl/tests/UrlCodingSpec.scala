@@ -10,8 +10,8 @@ class UrlCodingSpec extends Specification {
 
     "Encoding a URI should" ^
       "not change any of the allowed chars" ! {
-        val encoded = urlEncode("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ01234567890!$&'()*+,;=:/?#[]@-._~")
-        encoded must_== "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ01234567890!$&'()*+,;=:/?#[]@-._~"
+        val encoded = urlEncode("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ01234567890!$&'()*+,;=:/?@-._~")
+        encoded must_== "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ01234567890!$&'()*+,;=:/?@-._~"
       } ^
       "uppercase encodings already in a string" ! {
         ensureUppercasedEncodings("hello%3fworld") must_== "hello%3Fworld"
