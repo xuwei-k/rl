@@ -87,7 +87,7 @@ trait UrlCodingUtils {
             in.position(mark+1)
           }
         } else {
-          in.position(in.position() - 1)
+          out.put('%'.toByte)
         }
       } else if (c == '+' && plusIsSpace) {
         out.put(' '.toByte)

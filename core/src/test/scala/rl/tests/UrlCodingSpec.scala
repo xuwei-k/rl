@@ -36,6 +36,11 @@ class UrlCodingSpec extends Specification {
       "decode a pct encoded string" ! {
         urlDecode("hello%20world") must_== "hello world"
       } ^
+      "gracefully handle '%' encoding errors" ! {
+        urlDecode("%") must_== "%"
+        urlDecode("%2") must_== "%2"
+        urlDecode("%20") must_== " "
+      } ^
       "decode value consisting of 2 values to 1 char" ! {
         urlDecode("%C3%A9") must_== "é"
       } ^
