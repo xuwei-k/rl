@@ -56,6 +56,6 @@ class UrlCodingSpec extends Specification {
         urlDecode("+", plusIsSpace = false) must_== "+"
       } ^
       "it decodes + as space when the plusIsSpace flag is true" ! {
-        urlDecode("+", plusIsSpace = false) must_== "+"
+        urlDecode("+", plusIsSpace = true) must_== " "
       } ^ end
 }
