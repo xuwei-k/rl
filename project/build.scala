@@ -60,6 +60,7 @@ object RlSettings {
   val buildSettings = Defaults.defaultSettings ++ Seq(
       organization := buildOrganization,
       scalaVersion := buildScalaVersion,
+      crossScalaVersions := Seq("2.10.0", "2.11.0"),
       javacOptions ++= Seq("-Xlint:unchecked"),
       scalacOptions ++= Seq(
         "-optimize",
@@ -72,7 +73,7 @@ object RlSettings {
         case "2.9.0-1" => "org.specs2" %% "specs2" % "1.8.2" % "test"
         case v if v.startsWith("2.9.1") => "org.specs2" %% "specs2" % "1.12.4" % "test"
         case v if v.startsWith("2.9") => "org.specs2" %% "specs2" % "1.12.4.1" % "test"
-        case _ => "org.specs2" %% "specs2" % "1.14" % "test"
+        case _ => "org.specs2" %% "specs2" % "2.3.11" % "test"
       },
       libraryDependencies += "junit" % "junit" % "4.10" % "test",
       crossVersion := CrossVersion.binary,
