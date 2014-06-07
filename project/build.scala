@@ -155,9 +155,9 @@ object RlBuild extends Build {
   import RlSettings._
   val buildShellPrompt =  ShellPrompt.buildShellPrompt
   object rl {
-    val downloadDomainFile = TaskKey[Int]("update-tld-file", "updates the tld names dat file from mozilla")
-    val domainFile = SettingKey[File]("tld-file", "the file that contains the tld names")
-    val domainFileUrl = SettingKey[URL]("tld-file-url", "the url from where to download the file that contains the tld names")
+    val downloadDomainFile = TaskKey[Int]("updateTldFile", "updates the tld names dat file from mozilla")
+    val domainFile = SettingKey[File]("tldFile", "the file that contains the tld names")
+    val domainFileUrl = SettingKey[URL]("tldFileUrl", "the url from where to download the file that contains the tld names")
   }
 
   val unpublished = Seq(
@@ -192,7 +192,7 @@ object RlBuild extends Build {
     sourceGenerators in Compile <+= buildInfo,
     buildInfoKeys := Seq[BuildInfoKey](name, version, scalaVersion, sbtVersion),
     buildInfoPackage := "rl",
-    rl.domainFileUrl := url("http://mxr.mozilla.org/mozilla-central/source/netwerk/dns/effective_tld_names.dat?raw=1"),
+    rl.domainFileUrl := url("https://publicsuffix.org/list/effective_tld_names.dat"),
     rl.downloadDomainFile <<= (rl.domainFile, rl.domainFileUrl, streams) map (_ #< _ ! _.log),
     (compile in Compile) <<= (compile in Compile) dependsOn rl.downloadDomainFile,
     description := "An RFC-3986 compliant URI library."))
@@ -200,9 +200,9 @@ object RlBuild extends Build {
   lazy val followRedirects = Project("rl-expand", file("expand"), settings = projectSettings ++ Seq(
     name := "rl-expander",
     description := "Expands urls when they appear shortened",
-    libraryDependencies += "com.ning" % "async-http-client" % "1.7.21",
-    libraryDependencies += "org.slf4j" % "slf4j-api" % "1.7.5",
-    libraryDependencies += "ch.qos.logback" % "logback-classic" % "1.0.11" % "provided",
+    libraryDependencies += "com.ning" % "async-http-client" % "1.8.9",
+    libraryDependencies += "org.slf4j" % "slf4j-api" % "1.7.7",
+    libraryDependencies += "ch.qos.logback" % "logback-classic" % "1.1.2" % "provided",
     initialCommands in console :=
       """
         |import rl._

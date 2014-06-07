@@ -40,8 +40,8 @@ case object EmptyQueryString extends QueryString {
 }
 case class StringQueryString(rawValue: String) extends QueryString {
 
-  val uriPart = "?" + rawValue.blankOption.map(_.urlEncode).getOrElse("")
-  val value = rawValue.blankOption.map(_.urlEncode).getOrElse("")
+  val uriPart = "?" + rawValue.blankOption.fold("")(UrlCodingUtils.queryPartEncode(_))
+  val value = rawValue.blankOption.fold("")(UrlCodingUtils.queryPartEncode(_))
 
   val empty = ""
 
@@ -50,7 +50,7 @@ case class StringQueryString(rawValue: String) extends QueryString {
   def normalize = this
 }
 case class StringSeqQueryString(rawValue: String) extends QueryString {
-  val value: Value = rawValue.blankOption.map(_.split("&").map(_.urlDecode).toList).getOrElse(Nil)
+  val value: Value = rawValue.blankOption.map(_.split("&").map(UrlCodingUtils.queryPartEncode(_)).toList).getOrElse(Nil)
 
   val uriPart = "?" + value.map(_.urlEncode).mkString("?", "&", "")
 
@@ -100,7 +100,7 @@ case class MapQueryString(initialValues: Seq[(String, Seq[String])], rawValue: S
   def normalize = copy(SortedMap(initialValues filter (k ⇒ !QueryString.DEFAULT_EXCLUSIONS.contains(k._1)): _*) toSeq)
 
   private def mkString(values: Value = value) = values map {
-    case (k, v) ⇒ v.map(s ⇒ "%s=%s".format(k.urlEncode, s.urlEncode)).mkString("&")
+    case (k, v) ⇒ v.map(s ⇒ "%s=%s".format(UrlCodingUtils.queryPartEncode(k), UrlCodingUtils.queryPartEncode(s))).mkString("&")
   } mkString "&"
 
   type Value = immutable.Map[String, Seq[String]]

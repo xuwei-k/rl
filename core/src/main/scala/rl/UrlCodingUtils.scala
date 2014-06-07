@@ -10,6 +10,7 @@ import collection.immutable.BitSet
 trait UrlCodingUtils { 
 
   private val toSkip = BitSet((('a' to 'z') ++ ('A' to 'Z') ++ ('0' to '9') ++ "!$&'()*+,;=:/?@-._~".toSet).map(_.toInt): _*)
+  private val toSkipEncoding = BitSet((('a' to 'z') ++ ('A' to 'Z') ++ ('0' to '9') ++ ":@-._~".toSet).map(_.toInt): _*)
   private val space = ' '.toInt
   private[rl] val PctEncoded = """%([0-9a-fA-F][0-9a-fA-F])""".r
   private val LowerPctEncoded = """%([0-9a-f][0-9a-f])""".r
@@ -32,13 +33,23 @@ trait UrlCodingUtils {
     !isUrlEncoded(string) && containsInvalidUriChars(string)
   }
 
-  def ensureUrlEncoding(string: String) = if (needsUrlEncoding(string)) urlEncode(string) else string
+  def ensureUrlEncoding(string: String) = if (needsUrlEncoding(string)) urlEncode(string, toSkip = toSkip) else string
 
   def ensureUppercasedEncodings(string: String) = {
     LowerPctEncoded.replaceAllIn(string, (_: Match) match {
       case Regex.Groups(v) ⇒ "%" + v.toUpperCase(Locale.ENGLISH)
     })
   }
+
+  def pathPartEncode(toEncode: String, charset: Charset = Utf8, spaceIsPlus: Boolean = false) = {
+    urlEncode(toEncode, charset, spaceIsPlus, toSkipEncoding)
+  }
+
+  def queryPartEncode(toEncode: String, charset: Charset = Utf8, spaceIsPlus: Boolean = false) = {
+    urlEncode(toEncode, charset, spaceIsPlus, toSkipEncoding ++ BitSet('/', '?'))
+  }
+
+
 
   def urlEncode(toEncode: String, charset: Charset = Utf8, spaceIsPlus: Boolean = false, toSkip: BitSet = toSkip) = {
     val in = charset.encode(ensureUppercasedEncodings(toEncode))

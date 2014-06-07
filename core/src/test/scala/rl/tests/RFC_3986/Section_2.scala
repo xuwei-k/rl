@@ -17,13 +17,13 @@ class Section_2_1_percent_encoding extends Specification {
         Pending("Section 2.4 is not ready")
       } ^ p ^
       "Section 2.2 Reserved Characters" ^
-      "it does not encode general delimiters (gen-delims)" ! {
-        val generalDelimiters = ":/?@"
+      "it does not encode general delimiters valid in a path (gen-delims)" ! {
+        val generalDelimiters = ":@"
         urlEncode(generalDelimiters) must_== generalDelimiters
       } ^
-      "it does not encode subset delimiters (sub-delims)" ! {
+      "it does encodes subset delimiters (sub-delims)" ! {
         val subDelimiters = "!$&'()*+,;="
-        urlEncode(subDelimiters) must_== subDelimiters
+        urlEncode(subDelimiters) must_== "!$&'()*+,;="
       } ^ p ^
       "Section 2.3 Unreserved Characters" ^
       "it does not encode unreserved characters" ! {

@@ -13,7 +13,7 @@ trait UriPath extends UriNode {
       seg match {
         case "."  ⇒ lb
         case ".." ⇒ if (!lb.isEmpty) lb.dropRight(1) else lb
-        case a    ⇒ lb :+ a
+        case a    ⇒ lb :+ (if (UrlCodingUtils.needsUrlEncoding(a)) UrlCodingUtils.pathPartEncode(a) else a)
       }
     }
   }

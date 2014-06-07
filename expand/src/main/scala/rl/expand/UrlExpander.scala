@@ -13,6 +13,7 @@ import scala.concurrent.{Future, ExecutionContext, Promise}
 import org.slf4j.LoggerFactory
 import collection.JavaConverters._
 import scala.collection.mutable.ListBuffer
+import java.net.URI
 
 case class ExpanderConfig(
              maximumResolveSteps: Int = 15,
@@ -93,7 +94,9 @@ object UrlExpander {
           h.seen404 = false
           h.onRedirect(rl.Uri(h.current))
           h.count += 1
-          val newUri = rl.UrlCodingUtils.ensureUrlEncoding(ctx.getResponseHeaders.getHeaders.getFirstValue("Location"))
+
+          val loc = ctx.getResponseHeaders.getHeaders.getFirstValue("Location")
+          val newUri = rl.UrlCodingUtils.ensureUrlEncoding(loc)
 
           val uu = if(newUri.startsWith("http") || newUri.startsWith("ws")) newUri
           else rl.Uri(h.current).withPath(newUri).asciiString
