@@ -33,7 +33,7 @@ object ShellPrompt {
 
 object RlSettings {
   val buildOrganization = "org.scalatra.rl"
-  val buildScalaVersion = "2.10.0"
+  val buildScalaVersion = "2.11.0"
 //
 //  lazy val formatSettings = ScalariformPlugin.scalariformSettings ++ Seq(
 //     preferences in Compile := formattingPreferences,
@@ -60,7 +60,7 @@ object RlSettings {
   val buildSettings = Defaults.defaultSettings ++ Seq(
       organization := buildOrganization,
       scalaVersion := buildScalaVersion,
-      crossScalaVersions := Seq("2.10.0", "2.11.0"),
+      crossScalaVersions := Seq("2.11.0", "2.12.0-RC2"),
       javacOptions ++= Seq("-Xlint:unchecked"),
       scalacOptions ++= Seq(
         "-optimize",
@@ -69,10 +69,7 @@ object RlSettings {
         "-Xcheckinit",
         "-encoding", "utf8"),
       libraryDependencies <+= (scalaVersion) {
-        case "2.9.0" => "org.specs2" %% "specs2" % "1.7.1" % "test"
-        case "2.9.0-1" => "org.specs2" %% "specs2" % "1.8.2" % "test"
-        case v if v.startsWith("2.9.1") => "org.specs2" %% "specs2" % "1.12.4" % "test"
-        case v if v.startsWith("2.9") => "org.specs2" %% "specs2" % "1.12.4.1" % "test"
+        case v if v.startsWith("2.12") => "org.specs2" %% "specs2-core" % "3.8.5" % "test"
         case _ => "org.specs2" %% "specs2" % "2.3.11" % "test"
       },
       libraryDependencies += "junit" % "junit" % "4.10" % "test",
@@ -82,7 +79,6 @@ object RlSettings {
         "Sonatype Snapshots" at "https://oss.sonatype.org/content/repositories/snapshots",
         "Typesafe Releases" at "http://repo.typesafe.com/typesafe/releases/"
       ),
-      crossScalaVersions := Seq("2.10.0"),
 //      (excludeFilter in format) <<= (excludeFilter) (_ || "*Spec.scala"),
       libraryDependencies ++= compilerPlugins,
       artifact in (Compile, packageBin) ~= { (art: Artifact) =>
@@ -179,7 +175,7 @@ object RlBuild extends Build {
                           settings = Project.defaultSettings ++ unpublished ++ Seq(
                             name := "rl-project",
                             scalaVersion := buildScalaVersion,
-                            crossScalaVersions := Seq("2.10.0")
+                            crossScalaVersions := Seq("2.11.0", "2.12.0-RC2")
                           )) aggregate(core, followRedirects)
 
   lazy val core = Project ("rl", file("core"), settings = projectSettings ++ buildInfoSettings ++ Seq(
@@ -196,7 +192,6 @@ object RlBuild extends Build {
     rl.downloadDomainFile <<= (rl.domainFile, rl.domainFileUrl, streams) map (_ #< _ ! _.log),
     (compile in Compile) <<= (compile in Compile) dependsOn rl.downloadDomainFile,
     description := "An RFC-3986 compliant URI library."))
-
   lazy val followRedirects = Project("rl-expand", file("expand"), settings = projectSettings ++ Seq(
     name := "rl-expander",
     description := "Expands urls when they appear shortened",
