@@ -60,7 +60,7 @@ object RlSettings {
   val buildSettings = Defaults.defaultSettings ++ Seq(
       organization := buildOrganization,
       scalaVersion := buildScalaVersion,
-      crossScalaVersions := Seq("2.11.0", "2.12.0-RC2"),
+      crossScalaVersions := Seq("2.11.0", "2.12.0"),
       javacOptions ++= Seq("-Xlint:unchecked"),
       scalacOptions ++= Seq(
         "-optimize",
@@ -69,7 +69,7 @@ object RlSettings {
         "-Xcheckinit",
         "-encoding", "utf8"),
       libraryDependencies <+= (scalaVersion) {
-        case v if v.startsWith("2.12") => "org.specs2" %% "specs2-core" % "3.8.5" % "test"
+        case v if v.startsWith("2.12") => "org.specs2" %% "specs2-core" % "3.8.6" % "test"
         case _ => "org.specs2" %% "specs2" % "2.3.11" % "test"
       },
       libraryDependencies += "junit" % "junit" % "4.10" % "test",
@@ -175,7 +175,7 @@ object RlBuild extends Build {
                           settings = Project.defaultSettings ++ unpublished ++ Seq(
                             name := "rl-project",
                             scalaVersion := buildScalaVersion,
-                            crossScalaVersions := Seq("2.11.0", "2.12.0-RC2")
+                            crossScalaVersions := Seq("2.11.0", "2.12.0")
                           )) aggregate(core, followRedirects)
 
   lazy val core = Project ("rl", file("core"), settings = projectSettings ++ buildInfoSettings ++ Seq(
