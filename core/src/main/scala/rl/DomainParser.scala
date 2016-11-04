@@ -12,7 +12,7 @@ trait UriHostDomains { self: UriHost ⇒
 object DomainParser {
 
   lazy val publicSuffixes = {
-    val src = Source.fromInputStream(getClass.getResourceAsStream("/rl/tld_names.dat"))(Codec.UTF8)
+    val src = Source.fromInputStream(DomainParser.getClass.getResourceAsStream("/rl/tld_names.dat"))(Codec.UTF8)
     src.getLines.foldLeft(PublicSuffixList.empty) { (buff, line) ⇒
       line.blankOption filter (l ⇒ !l.startsWith("//")) map { l ⇒
         val parts = l.split("\\.").reverse
