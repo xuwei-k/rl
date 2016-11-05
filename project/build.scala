@@ -118,11 +118,6 @@ object RlBuild extends Build {
 
   import RlSettings._
   val buildShellPrompt =  ShellPrompt.buildShellPrompt
-  object rl {
-    val downloadDomainFile = TaskKey[Int]("updateTldFile", "updates the tld names dat file from mozilla")
-    val domainFile = SettingKey[File]("tldFile", "the file that contains the tld names")
-    val domainFileUrl = SettingKey[URL]("tldFileUrl", "the url from where to download the file that contains the tld names")
-  }
 
   val unpublished = Seq(
     // no artifacts in this project
@@ -148,17 +143,15 @@ object RlBuild extends Build {
 
   lazy val core = Project ("rl", file("core"), settings = projectSettings ++ buildInfoSettings ++ Seq(
     name := "rl",
-    rl.domainFile <<= (resourceDirectory in Compile) apply { dir =>
-      val rlResource = dir / "rl"
-      rlResource.mkdirs()
-      rlResource / "tld_names.dat"
+    (resourceGenerators in Compile) += task{
+      val rlResource = (resourceManaged in Compile).value / "rl"
+      val f = rlResource / "tld_names.dat"
+      IO.download(url("https://publicsuffix.org/list/effective_tld_names.dat"), f)
+      Seq(f)
     },
     sourceGenerators in Compile <+= buildInfo,
     buildInfoKeys := Seq[BuildInfoKey](name, version, scalaVersion, sbtVersion),
     buildInfoPackage := "rl",
-    rl.domainFileUrl := url("https://publicsuffix.org/list/effective_tld_names.dat"),
-    rl.downloadDomainFile <<= (rl.domainFile, rl.domainFileUrl, streams) map (_ #< _ ! _.log),
-    (compile in Compile) <<= (compile in Compile) dependsOn rl.downloadDomainFile,
     description := "An RFC-3986 compliant URI library."))
 
   lazy val followRedirects = Project("rl-expand", file("expand"), settings = projectSettings ++ Seq(
